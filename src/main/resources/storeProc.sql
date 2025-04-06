@@ -1,5 +1,4 @@
-DELIMITER $
-
+DROP PROCEDURE IF EXISTS ProcessDayTransactions;
 CREATE PROCEDURE ProcessDayTransactions()
 BEGIN
     DROP TEMPORARY TABLE IF EXISTS tmpTransaction;
@@ -24,7 +23,9 @@ BEGIN
            processed_amount*2 as new_processed_amount
     FROM tmpTransaction;
 
+    SELECT * FROM tmpTransaction2;
+
     -- Optional: Drop temporary table
     DROP TEMPORARY TABLE IF EXISTS tmpTransaction;
     DROP TEMPORARY TABLE IF EXISTS tmpTransaction2;
-END$
+END;

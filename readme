@@ -9,13 +9,13 @@ Simple guide to run MySQL locally using Docker.
 
 1. Run MySQL:
 ```bash
-docker run --name mysql-local -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=meudb -p 3306:3306 -d mysql:8.0 --default-authentication-plugin=mysql_native_password
+docker run --name mysql-local -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cucumber -p 3306:3306 -d mysql:8.0 --default-authentication-plugin=mysql_native_password
 ```
 
 ## Connection Details
 - Host: localhost
 - Port: 3306
-- Database: meudb
+- Database: cucumber
 - Username: root
 - Password: root
 
@@ -33,7 +33,7 @@ docker stop mysql-local
 
 Access MySQL CLI:
 ```bash
-docker exec -it mysql-local mysql -uroot -proot
+docker exec -it mysql-local mysql -uroot -p
 ```
 
 ## Troubleshooting
@@ -43,7 +43,7 @@ If connection fails:
 ```bash
 docker stop mysql-local
 docker rm mysql-local
-docker run --name mysql-local -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=meudb -p 3306:3306 -d mysql:8.0 --default-authentication-plugin=mysql_native_password
+docker run --name mysql-local -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cucumber -p 3306:3306 -d mysql:8.0 --default-authentication-plugin=mysql_native_password
 ```
 
 Note: This setup is for development purposes only.

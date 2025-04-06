@@ -16,15 +16,22 @@ public class JobRunner implements CommandLineRunner {
 
     private final JobLauncher jobLauncher;
     private final Job processTransactionsJob;
+    private final Job processStoredProcJob;
 
     @Override
     public void run(String... args) throws Exception {
-        log.info("Starting batch job");
+        log.info("Starting batch jobs");
+        
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())
                 .toJobParameters();
 
-        var execution = jobLauncher.run(processTransactionsJob, jobParameters);
-        log.info("Job completed with status: {}", execution.getStatus());
+        // Run the original job
+        var execution1 = jobLauncher.run(processTransactionsJob, jobParameters);
+        log.info("First job completed with status: {}", execution1.getStatus());
+
+        // Run the stored procedure job
+        var execution2 = jobLauncher.run(processStoredProcJob, jobParameters);
+        log.info("Stored procedure job completed with status: {}", execution2.getStatus());
     }
 } 
