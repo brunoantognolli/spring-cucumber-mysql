@@ -1,4 +1,6 @@
+#Tables must have unique names
 DROP TEMPORARY TABLE IF EXISTS tmpTransaction;
+DROP TEMPORARY TABLE IF EXISTS tmpTransaction2;
 
 CREATE TEMPORARY TABLE tmpTransaction as
     SELECT

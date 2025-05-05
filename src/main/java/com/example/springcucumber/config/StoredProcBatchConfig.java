@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StreamUtils;
 
@@ -37,19 +38,22 @@ public class StoredProcBatchConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
+    private final JdbcTemplate jdbcTemplate;
 
     private String loadSqlFile() throws IOException {
-        ClassPathResource resource = new ClassPathResource("anonymousBlock.sql");
+        ClassPathResource resource = new ClassPathResource("storeProc.sql");
         return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
     }
-
     @Bean
     public JdbcCursorItemReader<TransactionProcedureResult> storedProcReader() throws IOException {
+        // First, execute the SQL script to create temporary tables
+        String fullSql = loadSqlFile();
+        jdbcTemplate.execute(fullSql);
+
         return new JdbcCursorItemReaderBuilder<TransactionProcedureResult>()
                 .name("storedProcReader")
                 .dataSource(dataSource)
                 .sql("CALL ProcessDayTransactions()")
-                //.sql(loadSqlFile())
                 .rowMapper(new BeanPropertyRowMapper<>(TransactionProcedureResult.class))
                 .build();
     }
@@ -64,7 +68,7 @@ public class StoredProcBatchConfig {
     @Bean
     public ItemProcessor<TransactionProcedureResult, TransactionProcedureResult> storedProcProcessor() {
         return item -> {
-            log.info("Processing item: {}", item);
+            log.info("SP -> Processing item: {}", item);
             return item;
         };
     }

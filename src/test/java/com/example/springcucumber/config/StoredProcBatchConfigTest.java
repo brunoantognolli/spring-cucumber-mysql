@@ -1,5 +1,7 @@
 package com.example.springcucumber.config;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.StreamUtils;
 
 @SpringBootTest
 class StoredProcBatchConfigTest {
@@ -16,12 +20,19 @@ class StoredProcBatchConfigTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Test
-    void testStoredProcedureDirectly() {
+    private String loadSqlFile() throws IOException {
+        ClassPathResource resource = new ClassPathResource("storeProc.sql");
+        return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+    }
 
-        // Execute the SP and print raw results
-        String sql = "CALL ProcessDayTransactions()";
-        List<Map<String, Object>> rawResults = jdbcTemplate.queryForList(sql);
+    @Test
+    void testStoredProcedureDirectly() throws IOException {
+        // First, execute the stored procedure definition
+        String sql = loadSqlFile();
+        jdbcTemplate.execute(sql);
+        
+        // Then, call the stored procedure separately
+        List<Map<String, Object>> rawResults = jdbcTemplate.queryForList("CALL ProcessDayTransactions()");
         
         // Print raw results for debugging
         System.out.println("Raw SP Results:");

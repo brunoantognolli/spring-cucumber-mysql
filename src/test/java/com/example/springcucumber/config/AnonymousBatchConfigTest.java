@@ -28,7 +28,7 @@ class AnonymousBatchConfigTest {
 
     @Test
     void testStoredProcedureDirectly() throws IOException {
-        // Execute the SP and print raw results
+        // Execute Anonymous block and print results
         String sql = loadSqlFile();
         jdbcTemplate.execute(sql);
 
