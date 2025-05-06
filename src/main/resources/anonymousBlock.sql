@@ -7,8 +7,8 @@ CREATE TEMPORARY TABLE tmpTransaction as
         dt.id as transaction_id,
         dt.amount as original_amount,
         CASE
-            WHEN dt.status = 'PENDING' THEN dt.amount * 1.1
-            WHEN dt.status = 'FAILED' THEN dt.amount * 1.15
+            WHEN dt.status = 'PENDING' THEN dt.amount * :pendingMultiplier
+            WHEN dt.status = 'FAILED' THEN dt.amount * :failedMultiplier
             ELSE dt.amount
         END as processed_amount,
         CURRENT_TIMESTAMP() as processing_date,

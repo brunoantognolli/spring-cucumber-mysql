@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class AnonymousBatchConfigTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private String loadSqlFile() throws IOException {
         ClassPathResource resource = new ClassPathResource("anonymousBlock.sql");
@@ -30,9 +30,14 @@ class AnonymousBatchConfigTest {
     void testStoredProcedureDirectly() throws IOException {
         // Execute Anonymous block and print results
         String sql = loadSqlFile();
-        jdbcTemplate.execute(sql);
 
-        List<Map<String, Object>> rawResults = jdbcTemplate.queryForList("SELECT * FROM tmpTransaction2");
+        var paramMap = new java.util.HashMap<String, Object>();
+        paramMap.put("pendingMultiplier", 1.1);
+        paramMap.put("failedMultiplier", 1.15);
+
+        namedParameterJdbcTemplate.update(sql, paramMap);
+
+        List<Map<String, Object>> rawResults = namedParameterJdbcTemplate.queryForList("SELECT * FROM tmpTransaction2", paramMap);
 
         // Print raw results for debugging
         System.out.println("Raw Anonymous block Results:");

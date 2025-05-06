@@ -1,9 +1,11 @@
 package com.example.springcucumber.config;
 
-import com.example.springcucumber.entity.TransactionProcedureResult;
-import jakarta.persistence.EntityManagerFactory;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -18,13 +20,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StreamUtils;
 
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import com.example.springcucumber.entity.TransactionProcedureResult;
+
+import jakarta.persistence.EntityManagerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
@@ -35,7 +39,7 @@ public class AnonymousBlockBatchConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private String loadSqlFile() throws IOException {
         ClassPathResource resource = new ClassPathResource("anonymousBlock.sql");
@@ -46,7 +50,12 @@ public class AnonymousBlockBatchConfig {
     public JdbcCursorItemReader<TransactionProcedureResult> anonymousBlockReader() throws IOException {
         // First, execute the SQL script to create temporary tables
         String fullSql = loadSqlFile();
-        jdbcTemplate.execute(fullSql);
+        
+        var paramMap = new java.util.HashMap<String, Object>();
+        paramMap.put("pendingMultiplier", 1.1);
+        paramMap.put("failedMultiplier", 1.15);
+
+        namedParameterJdbcTemplate.update(fullSql, paramMap);
 
         return new JdbcCursorItemReaderBuilder<TransactionProcedureResult>()
                 .name("anonymousBlockReader")
